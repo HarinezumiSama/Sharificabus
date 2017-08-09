@@ -6,13 +6,15 @@ using Microsoft.Owin.Hosting;
 using Microsoft.Practices.Unity;
 using Omnifactotum;
 using Sharificabus.HostApplication.Api;
+using Sharificabus.HostApplication.DataAccess;
 
 namespace Sharificabus.HostApplication
 {
     internal static class Program
     {
         private const int FatalExitCode = -1;
-        private const string ServiceUrl = "http://+:80/sharificabus";
+
+        private static readonly string ServiceUrl = $@"http://+:80/{Constants.ApiServiceUrlSuffix}";
 
         private static int Main()
         {
@@ -139,6 +141,9 @@ namespace Sharificabus.HostApplication
             var container = new UnityContainer();
 
             container.RegisterType<IDependencyResolver, UnityDependencyResolver>(
+                new ContainerControlledLifetimeManager());
+
+            container.RegisterType<INotificationRepository, NotificationRepository>(
                 new ContainerControlledLifetimeManager());
 
             return container;

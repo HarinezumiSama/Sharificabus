@@ -13,6 +13,10 @@ namespace Sharificabus.HostApplication
 
         public static readonly string AppFullName = $@"{AppName} {AppVersion}";
 
+        public static readonly StringComparer ObjectIdComparer = StringComparer.Ordinal;
+
+        internal const string ApiServiceUrlSuffix = "sharificabus";
+
         private static string GetAppName()
             => GetHostAssembly().GetSingleCustomAttribute<AssemblyProductAttribute>(false).Product;
 

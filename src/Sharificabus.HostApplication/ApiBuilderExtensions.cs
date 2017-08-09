@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Text;
 using System.Web.Http;
@@ -9,10 +10,10 @@ using System.Web.Http.Dependencies;
 using System.Web.Http.ExceptionHandling;
 using Microsoft.Owin;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Omnifactotum.Annotations;
 using Owin;
 using Sharificabus.HostApplication.Api;
+using Swashbuckle.Application;
 
 namespace Sharificabus.HostApplication
 {
@@ -133,14 +134,30 @@ namespace Sharificabus.HostApplication
             var configuration = new HttpConfiguration();
             configuration.MapHttpAttributeRoutes();
 
-            configuration.Formatters.Clear();
-            configuration.Formatters.Add(new JsonMediaTypeFormatter());
-            configuration.Formatters.JsonFormatter.SerializerSettings.Formatting = Formatting.Indented;
-            configuration.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new StringEnumConverter());
+            var formatters = configuration.Formatters;
+            formatters.Clear();
+            formatters.Add(new JsonMediaTypeFormatter());
+
+            var serializerSettings = formatters.JsonFormatter.SerializerSettings;
+            serializerSettings.AssignApplicationWideSettings();
+            serializerSettings.Formatting = Formatting.Indented;
 
             configuration.Services.Replace(typeof(IExceptionHandler), new ApiExceptionHandler());
 
             configuration.DependencyResolver = dependencyResolver;
+
+            configuration
+                .EnableSwagger(
+                    config =>
+                    {
+                        config.RootUrl(
+                            message =>
+                                message.RequestUri.GetLeftPart(UriPartial.Authority)
+                                    + message.GetRequestContext().VirtualPathRoot.TrimEnd('/'));
+
+                        config.SingleApiVersion("v1", "Sharificabus API");
+                    })
+                .EnableSwaggerUi();
 
             builder
                 .UseNoCaching()

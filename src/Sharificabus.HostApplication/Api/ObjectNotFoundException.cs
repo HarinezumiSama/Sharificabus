@@ -9,11 +9,13 @@ namespace Sharificabus.HostApplication.Api
         internal ObjectNotFoundException(string message)
             : base(message)
         {
+            // Nothing to do
         }
 
         private ObjectNotFoundException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            // Nothing to do
         }
     }
 }
