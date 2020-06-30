@@ -50,7 +50,11 @@ namespace Sharificabus.HostApplication.Api
 
         public void Dispose()
         {
-            // Nothing to do; container is owned by its creator
+            // Not disposing the root container as its lifetime is manually managed in the application host
+            if (_container.Parent != null)
+            {
+                _container.Dispose();
+            }
         }
     }
 }

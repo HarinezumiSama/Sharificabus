@@ -88,23 +88,36 @@
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Http.Owin, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApiBuilderExtensions.cs" />
+    <Compile Include="Api\AppBuilderExtensions.cs" />
     <Compile Include="Api\ApiExceptionHandler.cs" />
+    <Compile Include="Api\AppBuilderLoggingExtensions.cs" />
+    <Compile Include="Api\Hosting\HostingSettings.cs" />
+    <Compile Include="Api\Hosting\HostingSettingsProvider.cs" />
+    <Compile Include="Api\Hosting\IHostingSettings.cs" />
+    <Compile Include="Api\Hosting\IHostingSettingsProvider.cs" />
+    <Compile Include="Api\Hosting\IServiceHandle.cs" />
+    <Compile Include="Api\Hosting\ServiceHandle.cs" />
+    <Compile Include="Api\Hosting\ApiHost.cs" />
     <Compile Include="Api\Model\Notification.cs" />
-    <Compile Include="Api\Model\ModelExtensions.cs" />
+    <Compile Include="Api\Model\ApiModelExtensions.cs" />
     <Compile Include="Api\Model\NotificationInfo.cs" />
     <Compile Include="Api\Model\PostNotificationRequest.cs" />
+    <Compile Include="Api\Model\SecurityPrincipal.cs" />
     <Compile Include="Api\Model\Timestamp.cs" />
+    <Compile Include="Api\Model\ApplicationSecurityPrincipal.cs" />
+    <Compile Include="Api\Model\UserSecurityPrincipal.cs" />
     <Compile Include="Api\ObjectNotFoundException.cs" />
-    <Compile Include="Api\SharificabusApiController.cs" />
+    <Compile Include="Api\Controllers\SharificabusApiController.cs" />
     <Compile Include="Api\UnityDependencyResolver.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="DataAccess\INotificationRepository.cs" />
@@ -112,13 +125,27 @@
     <Compile Include="LocalHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\SettingsExtensions.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="SharificabusService.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SharificabusService.Designer.cs">
+      <DependentUpon>SharificabusService.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Start\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

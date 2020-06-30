@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Reflection;
-using log4net;
 
 namespace Sharificabus.HostApplication
 {
     internal static class Constants
     {
-        public static readonly ILog Logger = LogManager.GetLogger(typeof(Constants));
+        public static readonly string ApiTitle = "Sharificabus API";
 
         public static readonly string AppName = GetAppName();
         public static readonly Version AppVersion = GetAppVersion();
@@ -14,8 +13,6 @@ namespace Sharificabus.HostApplication
         public static readonly string AppFullName = $@"{AppName} {AppVersion}";
 
         public static readonly StringComparer ObjectIdComparer = StringComparer.Ordinal;
-
-        internal const string ApiServiceUrlSuffix = "sharificabus";
 
         private static string GetAppName()
             => GetHostAssembly().GetSingleCustomAttribute<AssemblyProductAttribute>(false).Product;

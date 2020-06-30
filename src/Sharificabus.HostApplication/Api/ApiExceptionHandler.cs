@@ -5,20 +5,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.ExceptionHandling;
+using log4net;
+using Omnifactotum.Annotations;
 
 namespace Sharificabus.HostApplication.Api
 {
     internal sealed class ApiExceptionHandler : ExceptionHandler
     {
+        private readonly ILog _log;
+
+        public ApiExceptionHandler([NotNull] ILog log)
+        {
+            _log = log ?? throw new ArgumentNullException(nameof(log));
+        }
+
         public override void Handle(ExceptionHandlerContext context)
-            => context.Result = new ErrorDetailsResult(context);
+            => context.Result = new ErrorDetailsResult(_log, context);
 
         private sealed class ErrorDetailsResult : IHttpActionResult
         {
+            private readonly ILog _log;
             private readonly ExceptionHandlerContext _context;
 
-            public ErrorDetailsResult(ExceptionHandlerContext context)
+            public ErrorDetailsResult([NotNull] ILog log, [NotNull] ExceptionHandlerContext context)
             {
+                _log = log ?? throw new ArgumentNullException(nameof(log));
                 _context = context ?? throw new ArgumentNullException(nameof(context));
             }
 
@@ -34,7 +45,7 @@ namespace Sharificabus.HostApplication.Api
                     return CreateErrorResponse(HttpStatusCode.NotFound);
                 }
 
-                Constants.Logger.Error("An error occurred in API.", exception);
+                _log.Error("An error occurred in API.", exception);
 
                 if (exception is NotImplementedException)
                 {

@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.ServiceProcess;
 using System.Web.Http.Dependencies;
+using log4net;
 using log4net.Config;
-using Microsoft.Owin.Hosting;
 using Microsoft.Practices.Unity;
 using Omnifactotum;
 using Sharificabus.HostApplication.Api;
+using Sharificabus.HostApplication.Api.Hosting;
 using Sharificabus.HostApplication.DataAccess;
 
 namespace Sharificabus.HostApplication
@@ -14,7 +17,7 @@ namespace Sharificabus.HostApplication
     {
         private const int FatalExitCode = -1;
 
-        private static readonly string ServiceUrl = $@"http://+:80/{Constants.ApiServiceUrlSuffix}";
+        private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
 
         private static int Main()
         {
@@ -23,36 +26,52 @@ namespace Sharificabus.HostApplication
                 AppDomain.CurrentDomain.UnhandledException += ProcessDomainUnhandledException;
                 XmlConfigurator.Configure();
 
+                WriteConsole();
+                WriteConsole(ConsoleColor.Green, Constants.AppFullName, true);
+
+                var mode = Environment.UserInteractive ? @"interactive" : @"service";
+                WriteConsole(ConsoleColor.Yellow, $@"Application is starting ({mode} mode)...", true);
+
                 using (var container = CreateContainer())
                 {
-                    if (Environment.UserInteractive)
+                    using (var apiHost = new ApiHost(container))
                     {
-                        Console.Title = Constants.AppFullName;
+                        if (Environment.UserInteractive)
+                        {
+                            Console.Title = Constants.AppFullName;
+
+                            WriteConsole("The services are starting...", true);
+                            apiHost.Start();
+
+                            var serviceHandles = apiHost.GetServiceHandles();
+
+                            serviceHandles.DoForEach(
+                                handle => WriteConsole(
+                                    $@"The hosted Web service '{handle.Description}' has started at '{
+                                        handle.ServiceUrl}' (registration: '{handle.ServiceRegistrationUrl}')."));
+
+                            WriteConsole(ConsoleColor.Green, @"Application has started.", true);
+
+                            WriteConsole();
+                            WriteConsole(ConsoleColor.White, @"Press ESC to stop and exit.");
+                            WaitForKey(ConsoleKey.Escape);
+
+                            WriteConsole();
+                            WriteConsole(ConsoleColor.Yellow, @"Application is stopping...", true);
+                        }
+                        else
+                        {
+                            using (var sharificabusService = new SharificabusService(Log, apiHost))
+                            {
+                                ServiceBase.Run(sharificabusService);
+                            }
+                        }
                     }
-
-                    var dependencyResolver = container.Resolve<IDependencyResolver>();
-
-                    WriteConsole();
-                    WriteConsole(ConsoleColor.Green, Constants.AppFullName, true);
-                    WriteConsole();
-
-                    WriteConsole("The hosted Web services are starting...", true);
-                    WriteConsole($@"Service registration: {ServiceUrl}");
-                    var startOptions = new StartOptions(ServiceUrl);
-                    using (WebApp.Start(startOptions, builder => builder.UseSharificabusApi(dependencyResolver)))
-                    {
-                        WriteConsole("The hosted Web services has started.", true);
-
-                        WriteConsole();
-                        WriteConsole(ConsoleColor.White, @"Press ESC to stop and exit.");
-                        WaitForKey(ConsoleKey.Escape);
-
-                        WriteConsole();
-                        WriteConsole("The hosted Web services are stopping...", true);
-                    }
-
-                    WriteConsole("The hosted Web services has stopped.", true);
                 }
+
+                WriteConsole();
+                WriteConsole(ConsoleColor.Green, @"Application has stopped.", true);
+                WriteConsole();
             }
             catch (Exception ex)
                 when (!ex.IsFatal())
@@ -70,7 +89,7 @@ namespace Sharificabus.HostApplication
 
             WinEventLog.Write(EventLogEntryType.Error, $@"Unhandled exception has occurred: {errorDetails}");
 
-            Constants.Logger.Fatal(
+            Log.Fatal(
                 "*** Unhandled exception has occurred. The application will be terminated ***",
                 exception);
 
@@ -96,7 +115,7 @@ namespace Sharificabus.HostApplication
         {
             if (writeToLog)
             {
-                Constants.Logger.Info(text);
+                Log.Info(text);
             }
 
             if (!Environment.UserInteractive)
@@ -139,6 +158,8 @@ namespace Sharificabus.HostApplication
         private static UnityContainer CreateContainer()
         {
             var container = new UnityContainer();
+
+            container.RegisterInstance(Log);
 
             container.RegisterType<IDependencyResolver, UnityDependencyResolver>(
                 new ContainerControlledLifetimeManager());

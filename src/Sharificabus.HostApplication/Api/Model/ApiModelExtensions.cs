@@ -4,7 +4,7 @@ using Omnifactotum.Annotations;
 
 namespace Sharificabus.HostApplication.Api.Model
 {
-    internal static class ModelExtensions
+    internal static class ApiModelExtensions
     {
         private static readonly JsonSerializerSettings SerializerSettings = CreateSerializerSettings();
 

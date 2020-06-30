@@ -4,9 +4,10 @@ using Omnifactotum.Annotations;
 using Sharificabus.HostApplication.Api.Model;
 using Sharificabus.HostApplication.DataAccess;
 
-namespace Sharificabus.HostApplication.Api
+namespace Sharificabus.HostApplication.Api.Controllers
 {
     [RoutePrefix("api/v1")]
+    ////[Authorize]
     public sealed class SharificabusApiController : ApiController
     {
         private readonly INotificationRepository _notificationRepository;
